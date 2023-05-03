@@ -185,6 +185,79 @@ Web frameworks
 - Handle errors with HTTP status responses
 - simplify views by using OOP techniques: inheritance and reusability
 
+#### Basic View function
+
+```py
+from django.http import HttpResponse
+
+def home(request);
+  content = '<html><body><h1>Welcome!</h1></body></html>'
+  return HttpResponse(content)
+```
+
+Routing using URL dispatcher configuration.
+
+#### Basic Vew function and HTTP methods
+
+```py
+from django.shortcuts import render
+
+def myview(request):
+  if request.method == 'GET':
+    val = request.GET['key'] #get value from query parameter where key='key'
+    context_dict = {}
+    # logic
+    return render(request, 'template.html', context_dict)
+
+  return HttpResponse('text/HTML content returned')
+```
+
+#### class based views
+
+```py
+from django.views import View
+
+class MyView(View):
+  def get(self, request):
+    #rewrites the get()
+    return ...
+```
+
+#### Generic views
+
+- `django.views.generic`
+- TemplateView, CreateView, ListView, DetailView, UpdateView
+
+#### HttpRequest object
+
+- `request.path`
+- `request.method`
+- `request.user`: info of current user from `django.contrib.auth.models.User` class
+- AnonymousUser
+- `if request.user.is_authenticated()`
+
+#### HttpResponse Object
+
+- `status_code`
+
+#### URL
+
+path parameter
+
+- path converter: str, int, slug, uuid, path
+
+query parameter
+
+- key-value pairs. `request.GET['key']`
+
+body parameter in POST
+
+- apply `{% csrf_token %}` in the form
+
+#### Error handling views
+
+- [create custom views for error handling](https://www.coursera.org/learn/django-web-framework/lecture/bYSvR/demo-handle-errors-in-views)
+
 ### Template of MVT
 
 - DTL, dynamic contents and map objects to the template

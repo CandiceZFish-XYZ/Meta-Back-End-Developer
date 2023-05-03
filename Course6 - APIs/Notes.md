@@ -29,8 +29,9 @@ Use pipenv (to set up a new django project using pipenv instead of pip)
 
 **Installation**
 
-- in Terminal, go to project's folder and install django by running `pipenv install django`
+- in Terminal, go to project's folder
 - activate shell to work with `pipenv shell`
+- install django by running `pipenv install django`
 - create a new project and app. `django-admin startproject Booklist .` and `python3 manage.py startapp BookListAPI`
 - install DRF `pipenv install djangorestframework`
 
@@ -249,6 +250,123 @@ Order
 Pagination
 
 - query parameters and code setup
+
+### API authorizations
+
+#### Generate token for authentication in admin panel
+
+- token-based authentication
+- add in the INSTALLED_APPS session `rest_framework.authtoken`
+- then run migrations, createsuperuser to login to admin panel.
+- Create token for a user
+
+In the view, there is a secrete message for authenticated users only.
+
+```py
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
+
+@api_view()
+@permission_classes([isAuthenticated])
+def secret(request):
+  return Response({"message": "Some secret message"})
+```
+
+Add in the `REST_FRAMEWORK` settings session:
+
+- `'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework.authentication.TokenAuthentiction')`
+  Then send request (inSomnia) with Bearer Auth and fill in the Token with prefix 'Token' to view the secret message.
+
+#### Generate token from API endpoint
+
+- in App's `urls.py` file, add `from rest_framework.authtoken.views import obtain_auth_token`
+- pass in urlpatterns for token generation: `path('api-token-auth/', obtain_auth_token)`, only accepts POST and with username and pwd as formURLencoded data
+
+#### built-in User groups and roles
+
+- Admin as superuser
+- Manager, Staff, customer roles
+- Create manager-view endpoint to check for manager role
+  - example, check user before returning the secre msg in previous token example.
+  - `if request.user.groups.filter(name='Manager').exists()` else return 403 for unauthorized users.
+
+### Throttling to prevent API abuse
+
+Anonymous(no token) and authenticated users
+Add a throttle_check view function and map to the url
+
+```py
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
+
+@api_view()
+@throttle_classes([AnonRateThrottle])
+def throttle_check(request):
+  return Response({"message": "success"})
+
+@api_view()
+@permission_classes([IsAuthenticated])
+@throttle_classes([UserRateThrottle])
+def throttle_check_auth(request):
+  return Response({'message': "success for auth users"})
+```
+
+Then in settings file, add in REST_FRAMEWORK:
+
+- `'DEFAULT_THROTTLE_RATES': {'anon': '2/minute', 'user':'5/minute'}`
+
+### Djoser authentication library
+
+- install djoser and add `djoser` in the INSTALLED_APP after the `rest_framework` app.
+- Create new section in the settings file `DJOSER = {'USER_ID_FIELD': 'username', # acts as primary key; OR 'LOGIN_FIELD': 'email',}`
+- Add to the REST_FRAMEWORK `DEFAULT_AUTHENTICATION_CLASSES` session: `rest_framework.authentication.SessionAuthentication`; (remove before production)
+- enable djoser enpoints in project urls file: `path('auth/', include('djoser.urls')), path('auth/', include('djoser.urls.authtoken'))`
+- eg. 'localhost:8000/auth/users/me' provide details of user
+- generate token for a user in `.../auth/token/login`
+
+#### JSON Web Token (JWT)
+
+- install `djangorestframework-simplejwt~=5.2.1`
+- add to INSTALLED_APPS `rest_framework_simplejwt`
+- add to REST_FRAMEWORK `DEFAULT_AUTHENTICATION_CLASSES` add `rest_framework_simplejwt.authentication.JWTAuthentication`
+- add to project urls:
+  - `from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView`
+  - `path('api/token/', TokenObtainPairView.as_view())`, `path('api/token/refresh/', TokenRefreshView.as_view())` to accept username and pwd for token generations
+- access token, expires in 5 minutes `SIMPLE_JWT = { 'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5), }`
+- then use refresh token to regenerate access token
+
+Blacklist
+
+- To blacklist a refresh token: add to INSTALLED_APP `rest_framework_simplejwt.token_blacklist` and make migrations
+- Add to project urls:
+  - `from rest_framework_simplejwt.views import TokenBlackListView`
+  - `path('api/token/blacklist/', TokenBlackListView.as_view())`
+
+#### User management
+
+(Not using JWT but using DJoser)
+
+- create manager view to add users to a group
+- map to url to enable admin view
+
+```py
+from rest_framework.permissions import IsAdminUser
+from django.contrib.auth.models import User, Group
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def managers(request):
+  username = request.data['username']
+  if username:
+    user = get_object_or_404(User, username=username)
+    managers = Group.objects.get(name='Manager')
+    managers.user_set.add(user)
+    return Response({ 'msg': "ok" })
+
+  return Response({ 'msg': "error" }, status.HTTP_400_BAD_REQEUST)
+```
 
 ### Caching
 
