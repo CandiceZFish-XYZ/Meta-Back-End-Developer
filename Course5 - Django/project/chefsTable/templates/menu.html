@@ -1,0 +1,13 @@
+<!-- Add code to extend base.html file -->
+{% extends 'base.html' %}
+
+<!-- Add code to load static content -->
+{% load static %}
+
+<!-- Begin block content -->
+{% block content %}
+<p>Menu page</p>
+{% if menu %} {% for item in menu %} {{item.name}} : {{item.price}} <br />
+{% endfor %} {% else %}
+<p>No items to display</p>
+{% endif %} {% endblock %}
