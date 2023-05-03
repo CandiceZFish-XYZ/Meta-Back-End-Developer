@@ -11,6 +11,7 @@ lib
 pyvenv.cfg
 __pycache__
 migrations
+db.*
 
 
 # testing
