@@ -1,6 +1,7 @@
 from django.forms import ValidationError
 from rest_framework import serializers
-from .models import Category, MenuItem, Cart
+from .models import Category, MenuItem, Cart, Order, OrderItem
+from django.contrib.auth.models import User
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,10 +19,7 @@ class MenuItemSerializer(serializers.ModelSerializer):
         }
 
 class CartSerializer(serializers.ModelSerializer):
-    # class Meta:
-    #     model = Cart
-    #     fields = '__all__'
-    menuitem = MenuItemSerializer
+    menuitem = MenuItemSerializer(read_only=True)
     class Meta:
         model = Cart
         fields = ['id', 'menuitem', 'quantity', 'unit_price', 'price']
@@ -36,3 +34,20 @@ class CartSerializer(serializers.ModelSerializer):
         if Cart.objects.filter(user=user, menuitem=menuitem).exists():
             raise ValidationError('A cart item with this menu item already exists for this user.')
         return data
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    order = OrderSerializer(read_only=True)
+    menuitem = MenuItemSerializer(read_only=True)
+    class Meta:
+        model = OrderItem
+        fields = '__all__'

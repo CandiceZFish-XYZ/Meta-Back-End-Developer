@@ -287,7 +287,7 @@ Add in the `REST_FRAMEWORK` settings session:
 - Admin as superuser
 - Manager, Staff, customer roles
 - Create manager-view endpoint to check for manager role
-  - example, check user before returning the secre msg in previous token example.
+  - example, check user before returning the secret msg in previous token example.
   - `if request.user.groups.filter(name='Manager').exists()` else return 403 for unauthorized users.
 
 ### Throttling to prevent API abuse
@@ -346,7 +346,7 @@ Blacklist
 
 #### User management
 
-(Not using JWT but using DJoser)
+(Not using JWT but using Djoser)
 
 - create manager view to add users to a group
 - map to url to enable admin view
