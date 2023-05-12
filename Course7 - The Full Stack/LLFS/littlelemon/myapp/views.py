@@ -17,7 +17,7 @@ def form_view(request):
                 category = cd['category'],
                 description = cd['description']
             )
-            mf.save()
+            mf.save(using='menu_items')
             return JsonResponse({'message': 'Success'})
         
     return render(request, 'menu_items.html', {'form': form})

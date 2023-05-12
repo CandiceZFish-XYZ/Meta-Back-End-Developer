@@ -92,6 +92,14 @@ DATABASES = {
         'USER': 'root',
         'PASSWORD': 'qcczqccz',
         'PORT': '3306'
+    },
+    'reservations': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'reservations',
+        'HOST': 'localhost',
+        'USER': 'admindjango',
+        'PASSWORD': 'employee@123!',
+        'PORT': '3306'
     }
 }
 
