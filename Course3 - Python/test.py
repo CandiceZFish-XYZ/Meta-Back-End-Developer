@@ -1,25 +1,54 @@
-def sum_two_nums(num1, num2):
-    if type(num1) != int or type(num2) != int:
-        print("Both inputs should be numbers!")
-        return
-    return num1 + num2
+import time
+import random
 
-def sum_even_of_list(list):
-    sum = 0
-    for num in list:
-        if num % 2 == 0:
-            sum += num
-    return sum
+def print_output(decision): 
+    choice = "i"
+    while (choice == "i"):
+        choice = input("{} [y/n] \n(Enter i to see you inventory. )".format(decision)) 
+        if (choice == "i"):
+            # print_inventory()
+            pass
+        if choice in ['y', 'Y', 'Yes', 'YES', 'yes']:
+            return True 
+    return False
 
-def main():
-    print()
+def game():
+    # Get global variables global inventory
+    inventory = {"torch": 2}
+    # Play game 
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~") 
+    print("Welcome to the Cavern Adventure!") 
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print("Start : %s" % time.ctime())
+    # time.sleep(3)
+    print("End : %s" % time.ctime())
     
-    input1 = input("Please enter the FIRST number to compute the sum of two numbers: ")
-    input2 = input("Please enter the SECOND number to compute the sum of two numbers: ")
-    print("The result is " + str(sum_two_nums(int(input1), int(input2))) + ".")
+    print ("You enter a dark cavern out of curiosity. It is dark and you can only make out a small stick on the floor.")
+    
+    # Stick taken
+    if print_output("Do you take it?"):
+        num = random.random() 
+        print(num)
+        if num < 0.8:
+            print("You have taken the stick!") 
+            # time.sleep(2)
+            inventory["stick"] = 1
+        else:
+            print("Oh no! The stick was actually a snake.") 
+            # time.sleep(1)
+            complete = 0
+            return complete
+    # Stick not taken
+    else:
+        print("You did not take the stick")
+    
+    print ("Game continues. \nAs you proceed further into the cave, you see a large glowing object")
+    
+def main():
+# game loop
+    game()
+    
+if __name__ == "__main__": main()
 
-    # list = [1,2,3,4,5,4]
-    # print("The sum of even numbers in the list is: " + str(sum_even_of_list(list)))
 
-if __name__ == "__main__":
-    main()
+
