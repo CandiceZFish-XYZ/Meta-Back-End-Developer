@@ -1,34 +1,39 @@
 from django.shortcuts import render
-from django.urls import is_valid_path
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, DestroyAPIView
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Booking, Menu
-from .serializers import bookingSerializer, menuSerializer
+from .serializers import BookingSerializer, MenuSerializer
 
 def home(request):
     return render(request, 'index.html', {})
 
-class bookingView(APIView):
+@api_view()
+@permission_classes([IsAuthenticated])
+# @authentication_classes([TokenAuthentication])
+def msg(request):
+    return Response({"message":"This view is protected"})
+
+class BookingView(APIView):
     def get(self, request):
         items = Booking.objects.all()
-        serializer = bookingSerializer(items, many=True)
+        serializer = BookingSerializer(items, many=True)
         return Response(serializer.data) # return JSON
 
     def post(self, request):
-        serializer = bookingSerializer(data=request.data)
+        serializer = BookingSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({'status': 'success', 'data': serializer.data})
 
-class menuView(APIView):
-    def get(self, request):
-        items = Menu.objects.all()
-        serializer = menuSerializer(items, many=True)
-        return Response(serializer.data) # return JSON
+class MenuItemview(ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Menu.objects.all()
+    serializer_class = MenuSerializer
 
-    def post(self, request):
-        serializer = menuSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'status': 'success', 'data': serializer.data})
+class SingleMenuItemView(RetrieveUpdateAPIView, DestroyAPIView):
+    queryset = Menu.objects.all()
+    serializer_class = MenuSerializer
