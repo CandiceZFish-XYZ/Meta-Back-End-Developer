@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, DestroyAPIView
@@ -17,13 +18,14 @@ def home(request):
 def msg(request):
     return Response({"message":"This view is protected"})
 
-class BookingView(APIView):
-    def get(self, request):
+class BookingView(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
+    def list(self, request):
         items = Booking.objects.all()
         serializer = BookingSerializer(items, many=True)
         return Response(serializer.data) # return JSON
 
-    def post(self, request):
+    def retrieve(self, request, pk=None):
         serializer = BookingSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
